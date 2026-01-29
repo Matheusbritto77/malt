@@ -32,7 +32,7 @@ RUN pnpm ui:build
 
 ENV NODE_ENV=production
 ENV PATH="/app/node_modules/.bin:${PATH}"
-ENV CLAWDBOT_CONFIG_DIR="/app/data/.clawdbot"
+ENV CLAWDBOT_STATE_DIR="/app/data/.clawdbot"
 ENV CLAWDBOT_WORKSPACE_DIR="/app/data/clawd"
 ENV CLAWDBOT_PREFER_PNPM="1"
 ENV CLAWDBOT_NO_RESPAWN="1"
@@ -44,4 +44,4 @@ RUN mkdir -p /app/data/.clawdbot /app/data/clawd && chown -R node:node /app
 USER node
 
 # We use a shell to allow environment variable expansion (like $PORT)
-CMD ["sh", "-c", "mkdir -p $CLAWDBOT_CONFIG_DIR $CLAWDBOT_WORKSPACE_DIR && ( [ ! -f $CLAWDBOT_CONFIG_DIR/moltbot.json ] && cp .clawdbot.json $CLAWDBOT_CONFIG_DIR/moltbot.json || true ) && node moltbot.mjs gateway run --bind lan --allow-unconfigured --port ${PORT:-18789}"]
+CMD ["sh", "-c", "mkdir -p $CLAWDBOT_STATE_DIR $CLAWDBOT_WORKSPACE_DIR && ( [ ! -f $CLAWDBOT_STATE_DIR/moltbot.json ] && cp .clawdbot.json $CLAWDBOT_STATE_DIR/moltbot.json || true ) && node moltbot.mjs gateway run --bind lan --allow-unconfigured --port ${PORT:-18789}"]

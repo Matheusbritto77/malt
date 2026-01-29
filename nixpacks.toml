@@ -13,12 +13,12 @@ cmds = [
 ]
 
 [start]
-cmd = "mkdir -p $CLAWDBOT_CONFIG_DIR $CLAWDBOT_WORKSPACE_DIR && ( [ ! -f $CLAWDBOT_CONFIG_DIR/moltbot.json ] && cp .clawdbot.json $CLAWDBOT_CONFIG_DIR/moltbot.json || true ) && node moltbot.mjs gateway run --bind lan --allow-unconfigured --port ${PORT:-18789}"
+cmd = "mkdir -p $CLAWDBOT_STATE_DIR $CLAWDBOT_WORKSPACE_DIR && ( [ ! -f $CLAWDBOT_STATE_DIR/moltbot.json ] && cp .clawdbot.json $CLAWDBOT_STATE_DIR/moltbot.json || true ) && node moltbot.mjs gateway run --bind lan --allow-unconfigured --port ${PORT:-18789}"
 
 [variables]
 NODE_ENV = "production"
 CLAWDBOT_PREFER_PNPM = "1"
-CLAWDBOT_CONFIG_DIR = "/app/data/.clawdbot"
+CLAWDBOT_STATE_DIR = "/app/data/.clawdbot"
 CLAWDBOT_WORKSPACE_DIR = "/app/data/clawd"
 CLAWDBOT_NO_RESPAWN = "1"
 CI = "true"
