@@ -1,0 +1,19 @@
+{
+    "gateway": {
+        "mode": "local",
+        "bind": "lan",
+        "port": 18789,
+        "auth": {
+            "mode": "token",
+            "token": "admin123"
+        },
+        "controlUi": {
+            "enabled": true
+        }
+    },
+    "agents": {
+        "defaults": {
+            "workspace": "/app/data/clawd"
+        }
+    }
+}
