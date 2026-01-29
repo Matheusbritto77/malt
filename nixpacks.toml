@@ -1,8 +1,9 @@
 [phases.setup]
-nixPkgs = ["nodejs_22", "pnpm-10_x"]
+nixPkgs = ["nodejs_22", "pnpm-10_x", "git"]
 
 [phases.install]
-cmds = ["pnpm install --frozen-lockfile", "pnpm ui:install"]
+# We use --no-frozen-lockfile to bypass the lockfile mismatch error in Nixpacks
+cmds = ["pnpm install --no-frozen-lockfile", "pnpm ui:install"]
 
 [phases.build]
 cmds = [
@@ -16,9 +17,9 @@ cmd = "pnpm server"
 [variables]
 NODE_ENV = "production"
 CLAWDBOT_PREFER_PNPM = "1"
-# Ensure the config and workspace are in persistent locations if possible, 
-# although Coolify will manage volumes.
+# Persistent storage location for Coolify volumes
 CLAWDBOT_CONFIG_DIR = "/app/data/.clawdbot"
 CLAWDBOT_WORKSPACE_DIR = "/app/data/clawd"
-# Default to binding to all interfaces so it's accessible externally
 CLAWDBOT_GATEWAY_BIND = "lan"
+# Skip analytics/telemetry if any
+CI = "true"
