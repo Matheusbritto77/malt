@@ -2,7 +2,6 @@
 nixPkgs = ["nodejs_22", "pnpm-10_x", "git"]
 
 [phases.install]
-# We use --no-frozen-lockfile to bypass the lockfile mismatch error in Nixpacks
 cmds = ["pnpm install --no-frozen-lockfile", "pnpm ui:install"]
 
 [phases.build]
@@ -12,14 +11,15 @@ cmds = [
 ]
 
 [start]
-cmd = "pnpm server"
+cmd = "mkdir -p /app/data/.clawdbot /app/data/clawd 2>/dev/null || true && pnpm server"
 
 [variables]
 NODE_ENV = "production"
+PORT = "18789"
 CLAWDBOT_PREFER_PNPM = "1"
-# Persistent storage location for Coolify volumes
 CLAWDBOT_CONFIG_DIR = "/app/data/.clawdbot"
 CLAWDBOT_WORKSPACE_DIR = "/app/data/clawd"
 CLAWDBOT_GATEWAY_BIND = "lan"
-# Skip analytics/telemetry if any
+CLAWDBOT_GATEWAY_TOKEN = "admin123"
+CLAWDBOT_NO_RESPAWN = "1"
 CI = "true"
