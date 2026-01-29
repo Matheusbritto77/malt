@@ -8,7 +8,8 @@
             "token": "admin123"
         },
         "controlUi": {
-            "enabled": true
+            "enabled": true,
+            "dangerouslyDisableDeviceAuth": true
         }
     },
     "agents": {
