@@ -1,0 +1,24 @@
+[phases.setup]
+nixPkgs = ["nodejs_22", "pnpm-10_x"]
+
+[phases.install]
+cmds = ["pnpm install --frozen-lockfile", "pnpm ui:install"]
+
+[phases.build]
+cmds = [
+  "CLAWDBOT_A2UI_SKIP_MISSING=1 pnpm build",
+  "pnpm ui:build"
+]
+
+[start]
+cmd = "pnpm server"
+
+[variables]
+NODE_ENV = "production"
+CLAWDBOT_PREFER_PNPM = "1"
+# Ensure the config and workspace are in persistent locations if possible, 
+# although Coolify will manage volumes.
+CLAWDBOT_CONFIG_DIR = "/app/data/.clawdbot"
+CLAWDBOT_WORKSPACE_DIR = "/app/data/clawd"
+# Default to binding to all interfaces so it's accessible externally
+CLAWDBOT_GATEWAY_BIND = "lan"
