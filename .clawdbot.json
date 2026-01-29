@@ -21,11 +21,9 @@
     },
     "channels": {
         "defaults": {
-            "dmPolicy": "open",
             "groupPolicy": "open"
         },
         "whatsapp": {
-            "enabled": true,
             "dmPolicy": "open",
             "groupPolicy": "open",
             "allowFrom": [
