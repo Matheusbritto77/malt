@@ -9,12 +9,36 @@
         },
         "controlUi": {
             "enabled": true,
-            "dangerouslyDisableDeviceAuth": true
+            "dangerouslyDisableDeviceAuth": true,
+            "allowInsecureAuth": true
+        },
+        "trustedProxies": [
+            "10.0.1.4"
+        ]
+    },
+    "logging": {
+        "redactSensitive": "off"
+    },
+    "channels": {
+        "defaults": {
+            "dmPolicy": "open",
+            "groupPolicy": "open"
+        },
+        "whatsapp": {
+            "enabled": true,
+            "dmPolicy": "open",
+            "groupPolicy": "open",
+            "allowFrom": [
+                "*"
+            ]
         }
     },
     "agents": {
         "defaults": {
-            "workspace": "/app/data/clawd"
+            "workspace": "/app/data/clawd",
+            "sandbox": {
+                "mode": "off"
+            }
         }
     }
 }
