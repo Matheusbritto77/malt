@@ -9,17 +9,18 @@ cmds = [
   "CLAWDBOT_A2UI_SKIP_MISSING=1 pnpm build",
   "pnpm ui:build",
   "mkdir -p /app/data/.clawdbot /app/data/clawd",
-  "cp .clawdbot.json /app/data/.clawdbot/.clawdbot.json || true"
+  "cp .clawdbot.json /app/data/.clawdbot/moltbot.json || true"
 ]
 
 [start]
-cmd = "node moltbot.mjs gateway run"
+cmd = "mkdir -p $CLAWDBOT_CONFIG_DIR $CLAWDBOT_WORKSPACE_DIR && ( [ ! -f $CLAWDBOT_CONFIG_DIR/moltbot.json ] && cp .clawdbot.json $CLAWDBOT_CONFIG_DIR/moltbot.json || true ) && node moltbot.mjs gateway run --bind lan --allow-unconfigured --port $PORT"
 
 [variables]
 NODE_ENV = "production"
-PORT = "18789"
 CLAWDBOT_PREFER_PNPM = "1"
 CLAWDBOT_CONFIG_DIR = "/app/data/.clawdbot"
 CLAWDBOT_WORKSPACE_DIR = "/app/data/clawd"
 CLAWDBOT_NO_RESPAWN = "1"
 CI = "true"
+CLAWDBOT_GATEWAY_PORT = "$PORT"
+CLAWDBOT_GATEWAY_TOKEN = "admin123"
