@@ -1,23 +1,57 @@
 {
-    "gateway": {
-        "mode": "local",
-        "bind": "lan",
-        "port": 18789,
-        "auth": {
-            "mode": "token",
-            "token": "admin123"
-        },
-        "controlUi": {
-            "enabled": true,
-            "dangerouslyDisableDeviceAuth": true,
-            "allowInsecureAuth": true
-        },
-        "trustedProxies": [
-            "10.0.1.4"
-        ]
+    "meta": {
+        "lastTouchedVersion": "2026.1.29",
+        "lastTouchedAt": "2026-01-29T22:48:14.325Z"
     },
     "logging": {
         "redactSensitive": "off"
+    },
+    "agents": {
+        "defaults": {
+            "workspace": "/app/data/clawd",
+            "maxConcurrent": 4,
+            "subagents": {
+                "maxConcurrent": 8
+            },
+            "sandbox": {
+                "mode": "off"
+            },
+            "model": {
+                "primary": "google/gemini-2.5-flash"
+            }
+        }
+    },
+    "models": {
+        "providers": {
+            "google": {
+                "baseUrl": "https://generativelanguage.googleapis.com/v1beta",
+                "apiKey": "AIzaSyC8kbmMEM1JTp5FJkDIXOP515TD3hlOe1g",
+                "api": "google-generative-ai",
+                "models": [
+                    {
+                        "id": "gemini-2.5-flash",
+                        "name": "Gemini 2.5 Flash",
+                        "reasoning": true,
+                        "input": [
+                            "text",
+                            "image"
+                        ],
+                        "cost": {
+                            "input": 0.075,
+                            "output": 0.30,
+                            "cacheRead": 0.01875,
+                            "cacheWrite": 0.01875
+                        },
+                        "contextWindow": 1048576,
+                        "maxTokens": 65536
+                    }
+                ]
+            }
+        }
+    },
+    "commands": {
+        "native": "auto",
+        "nativeSkills": "auto"
     },
     "channels": {
         "defaults": {
@@ -25,17 +59,98 @@
         },
         "whatsapp": {
             "dmPolicy": "open",
-            "groupPolicy": "open",
             "allowFrom": [
                 "*"
-            ]
+            ],
+            "groupPolicy": "open",
+            "mediaMaxMb": 50,
+            "debounceMs": 0
+        },
+        "telegram": {
+            "dmPolicy": "open",
+            "allowFrom": [
+                "*"
+            ],
+            "groupPolicy": "open",
+            "streamMode": "partial"
+        },
+        "discord": {
+            "groupPolicy": "open",
+            "dm": {
+                "policy": "open",
+                "allowFrom": [
+                    "*"
+                ]
+            }
+        },
+        "googlechat": {
+            "groupPolicy": "open",
+            "dm": {
+                "policy": "open",
+                "allowFrom": [
+                    "*"
+                ]
+            }
+        },
+        "slack": {
+            "mode": "socket",
+            "webhookPath": "/slack/events",
+            "userTokenReadOnly": true,
+            "groupPolicy": "open",
+            "dm": {
+                "policy": "open",
+                "allowFrom": [
+                    "*"
+                ]
+            }
+        },
+        "signal": {
+            "dmPolicy": "open",
+            "allowFrom": [
+                "*"
+            ],
+            "groupPolicy": "open"
         }
     },
-    "agents": {
-        "defaults": {
-            "workspace": "/app/data/clawd",
-            "sandbox": {
-                "mode": "off"
+    "gateway": {
+        "port": 18789,
+        "mode": "local",
+        "bind": "lan",
+        "controlUi": {
+            "enabled": true,
+            "allowInsecureAuth": true,
+            "dangerouslyDisableDeviceAuth": true
+        },
+        "auth": {
+            "mode": "token",
+            "token": "admin123"
+        },
+        "trustedProxies": [
+            "10.0.1.4"
+        ]
+    },
+    "messages": {
+        "ackReactionScope": "group-mentions"
+    },
+    "plugins": {
+        "entries": {
+            "telegram": {
+                "enabled": true
+            },
+            "whatsapp": {
+                "enabled": true
+            },
+            "discord": {
+                "enabled": true
+            },
+            "googlechat": {
+                "enabled": true
+            },
+            "slack": {
+                "enabled": true
+            },
+            "signal": {
+                "enabled": true
             }
         }
     }
