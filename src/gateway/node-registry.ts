@@ -16,6 +16,17 @@ export type NodeSession = {
   remoteIp?: string;
   caps: string[];
   commands: string[];
+  commandSchemas?: Array<{
+    name: string;
+    description: string;
+    category?: string;
+    parameters?: {
+      type: string;
+      properties: Record<string, { type: string; description: string; default?: unknown }>;
+      required?: string[];
+    };
+    examples?: string[];
+  }>;
   permissions?: Record<string, boolean>;
   pathEnv?: string;
   connectedAtMs: number;
@@ -48,6 +59,9 @@ export class NodeRegistry {
     const commands = Array.isArray((connect as { commands?: string[] }).commands)
       ? ((connect as { commands?: string[] }).commands ?? [])
       : [];
+    const commandSchemas = Array.isArray((connect as { commandSchemas?: unknown[] }).commandSchemas)
+      ? ((connect as { commandSchemas?: NodeSession["commandSchemas"] }).commandSchemas ?? undefined)
+      : undefined;
     const permissions =
       typeof (connect as { permissions?: Record<string, boolean> }).permissions === "object"
         ? ((connect as { permissions?: Record<string, boolean> }).permissions ?? undefined)
@@ -70,6 +84,7 @@ export class NodeRegistry {
       remoteIp: opts.remoteIp,
       caps,
       commands,
+      commandSchemas,
       permissions,
       pathEnv,
       connectedAtMs: Date.now(),
