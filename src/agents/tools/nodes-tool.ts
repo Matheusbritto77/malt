@@ -39,6 +39,7 @@ const NODES_TOOL_ACTIONS = [
   "screen_record",
   "location_get",
   "run",
+  "invoke",
 ] as const;
 
 const NOTIFY_PRIORITIES = ["passive", "active", "timeSensitive"] as const;
@@ -86,6 +87,9 @@ const NodesToolSchema = Type.Object({
   commandTimeoutMs: Type.Optional(Type.Number()),
   invokeTimeoutMs: Type.Optional(Type.Number()),
   needsScreenRecording: Type.Optional(Type.Boolean()),
+  // invoke - call any custom node command
+  nodeCommand: Type.Optional(Type.String()),
+  nodeParams: Type.Optional(Type.Unknown()),
 });
 
 export function createNodesTool(options?: {
@@ -101,7 +105,7 @@ export function createNodesTool(options?: {
     label: "Nodes",
     name: "nodes",
     description:
-      "Discover and control paired nodes (status/describe/pairing/notify/camera/screen/location/run).",
+      "Discover and control paired nodes (status/describe/pairing/notify/camera/screen/location/run/invoke). Use 'invoke' action with nodeCommand and nodeParams to call custom commands like tv.apps, tv.control.",
     parameters: NodesToolSchema,
     execute: async (_toolCallId, args) => {
       const params = args as Record<string, unknown>;
@@ -176,8 +180,8 @@ export function createNodesTool(options?: {
                 : facingRaw === "front" || facingRaw === "back"
                   ? [facingRaw]
                   : (() => {
-                      throw new Error("invalid facing (front|back|both)");
-                    })();
+                    throw new Error("invalid facing (front|back|both)");
+                  })();
             const maxWidth =
               typeof params.maxWidth === "number" && Number.isFinite(params.maxWidth)
                 ? params.maxWidth
@@ -364,13 +368,13 @@ export function createNodesTool(options?: {
                 : undefined;
             const desiredAccuracy =
               params.desiredAccuracy === "coarse" ||
-              params.desiredAccuracy === "balanced" ||
-              params.desiredAccuracy === "precise"
+                params.desiredAccuracy === "balanced" ||
+                params.desiredAccuracy === "precise"
                 ? params.desiredAccuracy
                 : undefined;
             const locationTimeoutMs =
               typeof params.locationTimeoutMs === "number" &&
-              Number.isFinite(params.locationTimeoutMs)
+                Number.isFinite(params.locationTimeoutMs)
                 ? params.locationTimeoutMs
                 : undefined;
             const raw = (await callGatewayTool("node.invoke", gatewayOpts, {
@@ -435,6 +439,25 @@ export function createNodesTool(options?: {
                 agentId,
                 sessionKey,
               },
+              timeoutMs: invokeTimeoutMs,
+              idempotencyKey: crypto.randomUUID(),
+            })) as { payload?: unknown };
+            return jsonResult(raw?.payload ?? {});
+          }
+          case "invoke": {
+            // Call any custom command on a node (e.g., tv.apps, tv.control)
+            const node = readStringParam(params, "node", { required: true });
+            const nodeId = await resolveNodeId(gatewayOpts, node);
+            const nodeCommand = readStringParam(params, "nodeCommand", { required: true });
+            const nodeParams =
+              params.nodeParams && typeof params.nodeParams === "object"
+                ? params.nodeParams
+                : {};
+            const invokeTimeoutMs = parseTimeoutMs(params.invokeTimeoutMs);
+            const raw = (await callGatewayTool("node.invoke", gatewayOpts, {
+              nodeId,
+              command: nodeCommand,
+              params: nodeParams,
               timeoutMs: invokeTimeoutMs,
               idempotencyKey: crypto.randomUUID(),
             })) as { payload?: unknown };
