@@ -76,13 +76,17 @@ function normalizePlatformId(platform?: string, deviceFamily?: string): string {
 
 export function resolveNodeCommandAllowlist(
   cfg: MoltbotConfig,
-  node?: Pick<NodeSession, "platform" | "deviceFamily">,
+  node?: Pick<NodeSession, "platform" | "deviceFamily" | "commands">,
 ): Set<string> {
   const platformId = normalizePlatformId(node?.platform, node?.deviceFamily);
   const base = PLATFORM_DEFAULTS[platformId] ?? PLATFORM_DEFAULTS.unknown;
   const extra = cfg.gateway?.nodes?.allowCommands ?? [];
   const deny = new Set(cfg.gateway?.nodes?.denyCommands ?? []);
-  const allow = new Set([...base, ...extra].map((cmd) => cmd.trim()).filter(Boolean));
+
+  // Auto-allow declared commands if they exist
+  const declared = Array.isArray(node?.commands) ? node.commands : [];
+
+  const allow = new Set([...base, ...extra, ...declared].map((cmd) => cmd.trim()).filter(Boolean));
   for (const blocked of deny) {
     const trimmed = blocked.trim();
     if (trimmed) allow.delete(trimmed);
