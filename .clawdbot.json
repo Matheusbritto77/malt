@@ -1,31 +1,16 @@
 {
     "meta": {
         "lastTouchedVersion": "2026.1.29",
-        "lastTouchedAt": "2026-01-29T22:48:14.325Z"
+        "lastTouchedAt": "2026-01-30T00:47:00.000Z"
     },
     "logging": {
         "redactSensitive": "off"
-    },
-    "agents": {
-        "defaults": {
-            "workspace": "/app/data/clawd",
-            "maxConcurrent": 4,
-            "subagents": {
-                "maxConcurrent": 8
-            },
-            "sandbox": {
-                "mode": "off"
-            },
-            "model": {
-                "primary": "google/gemini-2.5-flash"
-            }
-        }
     },
     "models": {
         "providers": {
             "google": {
                 "baseUrl": "https://generativelanguage.googleapis.com/v1beta",
-                "apiKey": "AIzaSyC8kbmMEM1JTp5FJkDIXOP515TD3hlOe1g",
+                "apiKey": "AIzaSyBHhJrw2PYmDtUOH6qsYn0dWCeT99jlIt8",
                 "api": "google-generative-ai",
                 "models": [
                     {
@@ -38,7 +23,7 @@
                         ],
                         "cost": {
                             "input": 0.075,
-                            "output": 0.30,
+                            "output": 0.3,
                             "cacheRead": 0.01875,
                             "cacheWrite": 0.01875
                         },
@@ -48,6 +33,38 @@
                 ]
             }
         }
+    },
+    "agents": {
+        "defaults": {
+            "model": {
+                "primary": "google/gemini-2.5-flash"
+            },
+            "workspace": "/app/data/clawd",
+            "maxConcurrent": 4,
+            "subagents": {
+                "maxConcurrent": 8
+            },
+            "sandbox": {
+                "mode": "off"
+            }
+        }
+    },
+    "skills": {
+        "entries": {
+            "mcporter": {
+                "enabled": true,
+                "config": {
+                    "servers": {
+                        "site-server": {
+                            "url": "http://db-da-snbccz-463505-72-60-7-121.traefik.me/sse"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "messages": {
+        "ackReactionScope": "group-mentions"
     },
     "commands": {
         "native": "auto",
@@ -68,6 +85,7 @@
         },
         "telegram": {
             "dmPolicy": "open",
+            "botToken": "8530413288:AAEY67tdq87mJk6G-Mg24FkpmevpLv0DR1Y",
             "allowFrom": [
                 "*"
             ],
@@ -113,7 +131,7 @@
         }
     },
     "gateway": {
-        "port": 18789,
+        "port": 80,
         "mode": "local",
         "bind": "lan",
         "controlUi": {
@@ -128,9 +146,6 @@
         "trustedProxies": [
             "10.0.1.4"
         ]
-    },
-    "messages": {
-        "ackReactionScope": "group-mentions"
     },
     "plugins": {
         "entries": {
