@@ -36,6 +36,26 @@ export const ConnectParamsSchema = Type.Object(
     ),
     caps: Type.Optional(Type.Array(NonEmptyString, { default: [] })),
     commands: Type.Optional(Type.Array(NonEmptyString)),
+    commandSchemas: Type.Optional(
+      Type.Array(
+        Type.Object(
+          {
+            name: NonEmptyString,
+            description: NonEmptyString,
+            category: Type.Optional(NonEmptyString),
+            parameters: Type.Optional(
+              Type.Object({
+                type: Type.Optional(NonEmptyString),
+                properties: Type.Optional(Type.Record(NonEmptyString, Type.Unknown())),
+                required: Type.Optional(Type.Array(NonEmptyString)),
+              }),
+            ),
+            examples: Type.Optional(Type.Array(Type.String())),
+          },
+          { additionalProperties: true },
+        ),
+      ),
+    ),
     permissions: Type.Optional(Type.Record(NonEmptyString, Type.Boolean())),
     pathEnv: Type.Optional(Type.String()),
     role: Type.Optional(NonEmptyString),
