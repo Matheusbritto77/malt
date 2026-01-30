@@ -76,7 +76,7 @@ function normalizePlatformId(platform?: string, deviceFamily?: string): string {
 
 export function resolveNodeCommandAllowlist(
   cfg: MoltbotConfig,
-  node?: Pick<NodeSession, "platform" | "deviceFamily" | "commands">,
+  node?: Pick<NodeSession, "platform" | "deviceFamily"> & Partial<Pick<NodeSession, "commands">>,
 ): Set<string> {
   const platformId = normalizePlatformId(node?.platform, node?.deviceFamily);
   const base = PLATFORM_DEFAULTS[platformId] ?? PLATFORM_DEFAULTS.unknown;
