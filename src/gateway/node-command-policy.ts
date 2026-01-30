@@ -94,18 +94,43 @@ export function isNodeCommandAllowed(params: {
   command: string;
   declaredCommands?: string[];
   allowlist: Set<string>;
+  denylist?: Set<string>;
 }): { ok: true } | { ok: false; reason: string } {
   const command = params.command.trim();
   if (!command) return { ok: false, reason: "command required" };
-  if (!params.allowlist.has(command)) {
-    return { ok: false, reason: "command not allowlisted" };
+
+  // Check deny list first - these are always blocked
+  if (params.denylist?.has(command)) {
+    return { ok: false, reason: "command explicitly denied" };
   }
-  if (Array.isArray(params.declaredCommands) && params.declaredCommands.length > 0) {
-    if (!params.declaredCommands.includes(command)) {
-      return { ok: false, reason: "command not declared by node" };
+
+  // If command is in the static allowlist, it's allowed
+  if (params.allowlist.has(command)) {
+    // But still check if node declared it
+    if (Array.isArray(params.declaredCommands) && params.declaredCommands.length > 0) {
+      if (!params.declaredCommands.includes(command)) {
+        return { ok: false, reason: "command not declared by node" };
+      }
     }
-  } else {
-    return { ok: false, reason: "node did not declare commands" };
+    return { ok: true };
   }
-  return { ok: true };
+
+  // AUTO-ALLOW: If node declared the command, allow it automatically
+  // This enables nodes to expose custom commands like MCP servers
+  if (Array.isArray(params.declaredCommands) && params.declaredCommands.length > 0) {
+    if (params.declaredCommands.includes(command)) {
+      return { ok: true }; // Command declared by node = auto-allowed
+    }
+    return { ok: false, reason: "command not declared by node" };
+  }
+
+  return { ok: false, reason: "node did not declare commands" };
+}
+
+/**
+ * Build a denylist from config for blocking specific commands
+ */
+export function resolveNodeCommandDenylist(cfg: MoltbotConfig): Set<string> {
+  const deny = cfg.gateway?.nodes?.denyCommands ?? [];
+  return new Set(deny.map((cmd) => cmd.trim()).filter(Boolean));
 }

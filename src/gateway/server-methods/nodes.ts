@@ -29,7 +29,7 @@ import {
   uniqueSortedStrings,
 } from "./nodes.helpers.js";
 import { loadConfig } from "../../config/config.js";
-import { isNodeCommandAllowed, resolveNodeCommandAllowlist } from "../node-command-policy.js";
+import { isNodeCommandAllowed, resolveNodeCommandAllowlist, resolveNodeCommandDenylist } from "../node-command-policy.js";
 import type { GatewayRequestHandlers } from "./types.js";
 
 function isNodeEntry(entry: { role?: string; roles?: string[] }) {
@@ -390,10 +390,12 @@ export const nodeHandlers: GatewayRequestHandlers = {
       }
       const cfg = loadConfig();
       const allowlist = resolveNodeCommandAllowlist(cfg, nodeSession);
+      const denylist = resolveNodeCommandDenylist(cfg);
       const allowed = isNodeCommandAllowed({
         command,
         declaredCommands: nodeSession.commands,
         allowlist,
+        denylist,
       });
       if (!allowed.ok) {
         respond(

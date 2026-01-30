@@ -6,7 +6,7 @@ import {
 import { createBrowserRouteDispatcher } from "../../browser/routes/dispatcher.js";
 import { loadConfig } from "../../config/config.js";
 import { saveMediaBuffer } from "../../media/store.js";
-import { isNodeCommandAllowed, resolveNodeCommandAllowlist } from "../node-command-policy.js";
+import { isNodeCommandAllowed, resolveNodeCommandAllowlist, resolveNodeCommandDenylist } from "../node-command-policy.js";
 import type { NodeSession } from "../node-registry.js";
 import { ErrorCodes, errorShape } from "../protocol/index.js";
 import { safeParseJson } from "./nodes.helpers.js";
@@ -164,10 +164,12 @@ export const browserHandlers: GatewayRequestHandlers = {
 
     if (nodeTarget) {
       const allowlist = resolveNodeCommandAllowlist(cfg, nodeTarget);
+      const denylist = resolveNodeCommandDenylist(cfg);
       const allowed = isNodeCommandAllowed({
         command: "browser.proxy",
         declaredCommands: nodeTarget.commands,
         allowlist,
+        denylist,
       });
       if (!allowed.ok) {
         respond(

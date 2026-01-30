@@ -1,7 +1,7 @@
 {
     "meta": {
         "lastTouchedVersion": "2026.1.29",
-        "lastTouchedAt": "2026-01-30T00:47:00.000Z"
+        "lastTouchedAt": "2026-01-30T02:35:57.257Z"
     },
     "logging": {
         "redactSensitive": "off"
@@ -10,7 +10,7 @@
         "providers": {
             "google": {
                 "baseUrl": "https://generativelanguage.googleapis.com/v1beta",
-                "apiKey": "AIzaSyBHhJrw2PYmDtUOH6qsYn0dWCeT99jlIt8",
+                "apiKey": "AIzaSyAUxTsfE8HBfi9lnJWC5y8lQ79KRgLRHV0",
                 "api": "google-generative-ai",
                 "models": [
                     {
@@ -46,20 +46,6 @@
             },
             "sandbox": {
                 "mode": "off"
-            }
-        }
-    },
-    "skills": {
-        "entries": {
-            "mcporter": {
-                "enabled": true,
-                "config": {
-                    "servers": {
-                        "site-server": {
-                            "url": "http://db-da-snbccz-463505-72-60-7-121.traefik.me/sse"
-                        }
-                    }
-                }
             }
         }
     },
@@ -145,7 +131,24 @@
         },
         "trustedProxies": [
             "10.0.1.4"
-        ]
+        ],
+        "nodes": {
+            "denyCommands": []
+        }
+    },
+    "skills": {
+        "entries": {
+            "mcporter": {
+                "enabled": true,
+                "config": {
+                    "servers": {
+                        "site-server": {
+                            "url": "http://db-da-snbccz-463505-72-60-7-121.traefik.me/sse"
+                        }
+                    }
+                }
+            }
+        }
     },
     "plugins": {
         "entries": {
