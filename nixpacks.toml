@@ -43,6 +43,8 @@ CLAWDBOT_NO_RESPAWN = "1"
 CI = "true"
 CLAWDBOT_GATEWAY_PORT = "$PORT"
 CLAWDBOT_GATEWAY_TOKEN = "admin123"
-# Browser headless settings
-CHROMIUM_FLAGS = "--headless --no-sandbox --disable-gpu --disable-dev-shm-usage"
-PUPPETEER_EXECUTABLE_PATH = "/nix/store/chromium/bin/chromium"
+# Browser headless settings - these override config file values
+CLAWDBOT_BROWSER_HEADLESS = "true"
+CLAWDBOT_BROWSER_NO_SANDBOX = "true"
+# Chromium executable path (updated dynamically by nixpacks if needed)
+CHROMIUM_EXECUTABLE_PATH = "/nix/var/nix/profiles/default/bin/chromium"

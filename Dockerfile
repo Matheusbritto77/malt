@@ -26,7 +26,11 @@ RUN apt-get update && \
     libpango-1.0-0 \
     libcairo2 \
     && apt-get clean \
-    && rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/*
+    && rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/* \
+    && which chromium && chromium --version || echo "Chromium installed at: $(find /usr -name 'chromium*' -type f 2>/dev/null | head -5)"
+
+# Set Chromium executable path for the browser module
+ENV CHROMIUM_EXECUTABLE_PATH="/usr/bin/chromium"
 
 WORKDIR /app
 

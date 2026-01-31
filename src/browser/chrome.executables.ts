@@ -432,9 +432,27 @@ export function findChromeExecutableLinux(): BrowserExecutable | null {
     { kind: "chromium", path: "/usr/bin/chromium" },
     { kind: "chromium", path: "/usr/bin/chromium-browser" },
     { kind: "chromium", path: "/snap/bin/chromium" },
+    // Additional paths for Docker containers and package managers
+    { kind: "chromium", path: "/usr/lib/chromium/chromium" },
+    { kind: "chromium", path: "/usr/lib/chromium-browser/chromium-browser" },
+    { kind: "chromium", path: "/opt/chromium/chromium" },
+    { kind: "chrome", path: "/opt/google/chrome/chrome" },
+    { kind: "chrome", path: "/opt/google/chrome/google-chrome" },
   ];
 
-  return findFirstExecutable(candidates);
+  const found = findFirstExecutable(candidates);
+  if (found) return found;
+
+  // Fallback: try to find via PATH using `which`
+  const chromiumNames = ["chromium", "chromium-browser", "google-chrome", "google-chrome-stable"];
+  for (const name of chromiumNames) {
+    const resolved = execText("which", [name], 800);
+    if (resolved && exists(resolved.trim())) {
+      return { kind: inferKindFromExecutableName(name), path: resolved.trim() };
+    }
+  }
+
+  return null;
 }
 
 export function findChromeExecutableWindows(): BrowserExecutable | null {
@@ -517,6 +535,12 @@ export function resolveBrowserExecutableForPlatform(
       throw new Error(`browser.executablePath not found: ${resolved.executablePath}`);
     }
     return { kind: "custom", path: resolved.executablePath };
+  }
+
+  // Check for environment variable override (useful for Docker/VPS deployments)
+  const envExecutablePath = process.env.CHROMIUM_EXECUTABLE_PATH?.trim();
+  if (envExecutablePath && exists(envExecutablePath)) {
+    return { kind: "chromium", path: envExecutablePath };
   }
 
   const detected = detectDefaultChromiumExecutable(platform);
