@@ -1,0 +1,60 @@
+# Docker Compose para VPS - Browser Headless sem necessidade de interface gráfica
+# 
+# USO:
+#   docker-compose -f docker-compose.vps.yml up -d
+#
+# O browser irá rodar em modo HEADLESS automaticamente, sem precisar de:
+# - Interface gráfica
+# - Extensão do Chrome instalada manualmente
+# - VNC ou X11
+#
+# O perfil "clawd" é usado por padrão, que controla o browser via CDP diretamente.
+
+services:
+  moltbot-gateway:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: moltbot:vps
+    environment:
+      HOME: /home/node
+      TERM: xterm-256color
+      NODE_ENV: production
+      # Token de autenticação do gateway (MUDE ISSO!)
+      CLAWDBOT_GATEWAY_TOKEN: ${CLAWDBOT_GATEWAY_TOKEN:-admin123}
+      # Diretórios de dados
+      CLAWDBOT_STATE_DIR: /home/node/.clawdbot
+      CLAWDBOT_WORKSPACE_DIR: /home/node/clawd
+      # Outras APIs (opcional)
+      CLAUDE_AI_SESSION_KEY: ${CLAUDE_AI_SESSION_KEY:-}
+      CLAUDE_WEB_SESSION_KEY: ${CLAUDE_WEB_SESSION_KEY:-}
+      CLAUDE_WEB_COOKIE: ${CLAUDE_WEB_COOKIE:-}
+      # Forçar headless e no-sandbox para container Linux
+      CLAWDBOT_BROWSER_HEADLESS: "true"
+      CLAWDBOT_BROWSER_NO_SANDBOX: "true"
+    volumes:
+      # Persistir dados entre restarts
+      - moltbot-config:/home/node/.clawdbot
+      - moltbot-workspace:/home/node/clawd
+      # Shared memory maior para Chrome (evita crashes)
+      - /dev/shm:/dev/shm
+    ports:
+      # Gateway Web UI
+      - "${PORT:-80}:80"
+      # Browser CDP (opcional, para debug)
+      - "9222:9222"
+    init: true
+    restart: unless-stopped
+    # Aumentar limites para Chrome
+    shm_size: '2gb'
+    security_opt:
+      - seccomp:unconfined
+    command:
+      [
+        "sh", "-c",
+        "mkdir -p $CLAWDBOT_STATE_DIR $CLAWDBOT_WORKSPACE_DIR && ( [ ! -f $CLAWDBOT_STATE_DIR/moltbot.json ] && cp .clawdbot.json $CLAWDBOT_STATE_DIR/moltbot.json || true ) && node moltbot.mjs gateway run --bind lan --allow-unconfigured --port 80"
+      ]
+
+volumes:
+  moltbot-config:
+  moltbot-workspace:

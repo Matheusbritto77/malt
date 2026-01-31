@@ -150,6 +150,18 @@
             }
         }
     },
+    "browser": {
+        "enabled": true,
+        "headless": true,
+        "noSandbox": true,
+        "defaultProfile": "clawd",
+        "profiles": {
+            "clawd": {
+                "driver": "clawd",
+                "color": "#FF4500"
+            }
+        }
+    },
     "plugins": {
         "entries": {
             "telegram": {

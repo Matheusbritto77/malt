@@ -157,10 +157,10 @@ export function resolveBrowserConfig(
   const rawCdpUrl = (cfg?.cdpUrl ?? "").trim();
   let cdpInfo:
     | {
-        parsed: URL;
-        port: number;
-        normalized: string;
-      }
+      parsed: URL;
+      port: number;
+      normalized: string;
+    }
     | undefined;
   if (rawCdpUrl) {
     cdpInfo = parseHttpUrl(rawCdpUrl, "browser.cdpUrl");
@@ -179,8 +179,12 @@ export function resolveBrowserConfig(
     };
   }
 
-  const headless = cfg?.headless === true;
-  const noSandbox = cfg?.noSandbox === true;
+  // Support environment variable overrides for VPS/container deployments
+  const envHeadless = process.env.CLAWDBOT_BROWSER_HEADLESS?.trim().toLowerCase();
+  const envNoSandbox = process.env.CLAWDBOT_BROWSER_NO_SANDBOX?.trim().toLowerCase();
+
+  const headless = envHeadless === "1" || envHeadless === "true" || cfg?.headless === true;
+  const noSandbox = envNoSandbox === "1" || envNoSandbox === "true" || cfg?.noSandbox === true;
   const attachOnly = cfg?.attachOnly === true;
   const executablePath = cfg?.executablePath?.trim() || undefined;
 

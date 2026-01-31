@@ -1,5 +1,24 @@
 [phases.setup]
-nixPkgs = ["nodejs_22", "pnpm-10_x", "git"]
+nixPkgs = [
+    "nodejs_22", 
+    "pnpm-10_x", 
+    "git",
+    "chromium",
+    "nss",
+    "atk",
+    "at-spi2-atk",
+    "libdrm",
+    "libxkbcommon",
+    "xorg.libXcomposite",
+    "xorg.libXdamage",
+    "xorg.libXrandr",
+    "mesa",
+    "alsa-lib",
+    "pango",
+    "cairo",
+    "liberation_ttf",
+    "noto-fonts-emoji"
+]
 
 [phases.install]
 cmds = ["pnpm install --no-frozen-lockfile", "pnpm ui:install"]
@@ -24,3 +43,6 @@ CLAWDBOT_NO_RESPAWN = "1"
 CI = "true"
 CLAWDBOT_GATEWAY_PORT = "$PORT"
 CLAWDBOT_GATEWAY_TOKEN = "admin123"
+# Browser headless settings
+CHROMIUM_FLAGS = "--headless --no-sandbox --disable-gpu --disable-dev-shm-usage"
+PUPPETEER_EXECUTABLE_PATH = "/nix/store/chromium/bin/chromium"
