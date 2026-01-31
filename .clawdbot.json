@@ -157,6 +157,7 @@
         "defaultProfile": "clawd",
         "profiles": {
             "clawd": {
+                "cdpPort": 9222,
                 "driver": "clawd",
                 "color": "#FF4500"
             }
