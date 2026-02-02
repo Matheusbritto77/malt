@@ -6,7 +6,7 @@ ENV PATH="/root/.bun/bin:${PATH}"
 
 RUN corepack enable
 
-# Install Chromium and dependencies for headless browser
+# Install Chromium and dependencies for headless browser, and dependencies for Homebrew
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
     chromium \
@@ -25,9 +25,21 @@ RUN apt-get update && \
     libasound2 \
     libpango-1.0-0 \
     libcairo2 \
+    build-essential \
+    procps \
+    curl \
+    file \
+    git \
+    ca-certificates \
     && apt-get clean \
-    && rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/* \
-    && which chromium && chromium --version || echo "Chromium installed at: $(find /usr -name 'chromium*' -type f 2>/dev/null | head -5)"
+    && rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/*
+
+# Install Homebrew (Linuxbrew)
+ENV HOMEBREW_PREFIX="/home/linuxbrew/.linuxbrew"
+ENV PATH="${HOMEBREW_PREFIX}/bin:${HOMEBREW_PREFIX}/sbin:${PATH}"
+RUN /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" && \
+    if [ -d "$HOMEBREW_PREFIX" ]; then chown -R node:node "$HOMEBREW_PREFIX"; fi
+
 
 # Set Chromium executable path for the browser module
 ENV CHROMIUM_EXECUTABLE_PATH="/usr/bin/chromium"

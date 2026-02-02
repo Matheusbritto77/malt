@@ -76,7 +76,7 @@ function renderSkill(skill: SkillStatusEntry, props: SkillsProps) {
   const busy = props.busyKey === skill.skillKey;
   const apiKey = props.edits[skill.skillKey] ?? "";
   const message = props.messages[skill.skillKey] ?? null;
-  const canInstall = skill.install.length > 0;
+  const canInstall = skill.install.length > 0 && skill.missing.bins.length > 0;
   const missing = [
     ...skill.missing.bins.map((b) => `bin:${b}`),
     ...skill.missing.env.map((e) => `env:${e}`),
