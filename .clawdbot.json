@@ -10,7 +10,7 @@
         "providers": {
             "google": {
                 "baseUrl": "https://generativelanguage.googleapis.com/v1beta",
-                "apiKey": "AIzaSyAUxTsfE8HBfi9lnJWC5y8lQ79KRgLRHV0",
+                "apiKey": "chave_aqui",
                 "api": "google-generative-ai",
                 "models": [
                     {

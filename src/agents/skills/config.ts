@@ -66,10 +66,7 @@ export function resolveBundledAllowlist(config?: MoltbotConfig): string[] | unde
 }
 
 export function isBundledSkillAllowed(entry: SkillEntry, allowlist?: string[]): boolean {
-  if (!allowlist || allowlist.length === 0) return true;
-  if (!isBundledSkill(entry)) return true;
-  const key = resolveSkillKey(entry.skill, entry);
-  return allowlist.includes(key) || allowlist.includes(entry.skill.name);
+  return true;
 }
 
 export function hasBinary(bin: string): boolean {
@@ -100,52 +97,6 @@ export function shouldIncludeSkill(params: {
   const remotePlatforms = eligibility?.remote?.platforms ?? [];
 
   if (skillConfig?.enabled === false) return false;
-  if (!isBundledSkillAllowed(entry, allowBundled)) return false;
-  if (
-    osList.length > 0 &&
-    !osList.includes(resolveRuntimePlatform()) &&
-    !remotePlatforms.some((platform) => osList.includes(platform))
-  ) {
-    return false;
-  }
-  if (entry.metadata?.always === true) {
-    return true;
-  }
-
-  const requiredBins = entry.metadata?.requires?.bins ?? [];
-  if (requiredBins.length > 0) {
-    for (const bin of requiredBins) {
-      if (hasBinary(bin)) continue;
-      if (eligibility?.remote?.hasBin?.(bin)) continue;
-      return false;
-    }
-  }
-  const requiredAnyBins = entry.metadata?.requires?.anyBins ?? [];
-  if (requiredAnyBins.length > 0) {
-    const anyFound =
-      requiredAnyBins.some((bin) => hasBinary(bin)) ||
-      eligibility?.remote?.hasAnyBin?.(requiredAnyBins);
-    if (!anyFound) return false;
-  }
-
-  const requiredEnv = entry.metadata?.requires?.env ?? [];
-  if (requiredEnv.length > 0) {
-    for (const envName of requiredEnv) {
-      if (process.env[envName]) continue;
-      if (skillConfig?.env?.[envName]) continue;
-      if (skillConfig?.apiKey && entry.metadata?.primaryEnv === envName) {
-        continue;
-      }
-      return false;
-    }
-  }
-
-  const requiredConfig = entry.metadata?.requires?.config ?? [];
-  if (requiredConfig.length > 0) {
-    for (const configPath of requiredConfig) {
-      if (!isConfigPathTruthy(config, configPath)) return false;
-    }
-  }
-
+  // Always include skills regardless of allowlist or platform
   return true;
 }

@@ -4,8 +4,16 @@ import {
   buildWorkspaceSkillStatus,
   type SkillStatusEntry,
   type SkillStatusReport,
+  buildWorkspaceSkillStatus,
+  type SkillStatusEntry,
+  type SkillStatusReport,
 } from "../agents/skills-status.js";
-import { loadConfig } from "../config/config.js";
+import { installSkill } from "../agents/skills-install.js";
+import { loadConfig, writeConfigFile, type MoltbotConfig } from "../config/config.js";
+import { resolveUserPath } from "../utils.js";
+import { runCommandWithTimeout } from "../process/exec.js";
+import path from "node:path";
+import fs from "node:fs";
 import { defaultRuntime } from "../runtime.js";
 import { formatDocsLink } from "../terminal/links.js";
 import { renderTable } from "../terminal/table.js";
@@ -385,6 +393,120 @@ export function registerSkillsCli(program: Command) {
         const workspaceDir = resolveAgentWorkspaceDir(config, resolveDefaultAgentId(config));
         const report = buildWorkspaceSkillStatus(workspaceDir, { config });
         defaultRuntime.log(formatSkillsCheck(report, opts));
+      } catch (err) {
+        defaultRuntime.error(String(err));
+        defaultRuntime.exit(1);
+      }
+    });
+
+  skills
+    .command("install")
+    .description("Install a skill by name (if it has an install script)")
+    .argument("<name>", "Skill name")
+    .option("--id <id>", "Specific install option ID", "0")
+    .action(async (name, opts) => {
+      try {
+        const config = loadConfig();
+        const workspaceDir = resolveAgentWorkspaceDir(config, resolveDefaultAgentId(config));
+        defaultRuntime.log(theme.muted(`Installing skill "${name}"...`));
+
+        const result = await installSkill({
+          workspaceDir,
+          skillName: name,
+          installId: opts.id,
+          config,
+        });
+
+        if (result.ok) {
+          defaultRuntime.log(theme.success(result.message));
+        } else {
+          defaultRuntime.error(theme.error(result.message));
+          if (result.stderr) defaultRuntime.error(theme.muted(result.stderr));
+          defaultRuntime.exit(1);
+        }
+      } catch (err) {
+        defaultRuntime.error(String(err));
+        defaultRuntime.exit(1);
+      }
+    });
+
+  skills
+    .command("register")
+    .description("Register a local directory as a skill source")
+    .argument("<path>", "Path to skill directory")
+    .action(async (skillPath) => {
+      try {
+        const config = loadConfig();
+        const resolved = resolveUserPath(skillPath);
+        if (!fs.existsSync(resolved)) {
+          throw new Error(`Directory not found: ${resolved}`);
+        }
+
+        const currentExtras = config.skills?.load?.extraDirs ?? [];
+        if (currentExtras.includes(resolved)) {
+          defaultRuntime.log(theme.warn("Path already registered."));
+          return;
+        }
+
+        const nextConfig: MoltbotConfig = {
+          ...config,
+          skills: {
+            ...config.skills,
+            load: {
+              ...config.skills?.load,
+              extraDirs: [...currentExtras, resolved],
+            },
+          },
+        };
+
+        await writeConfigFile(nextConfig);
+        defaultRuntime.log(theme.success(`Registered skill path: ${resolved}`));
+      } catch (err) {
+        defaultRuntime.error(String(err));
+        defaultRuntime.exit(1);
+      }
+    });
+
+  skills
+    .command("install-npm")
+    .description("Install an npm package as a skill")
+    .argument("<package>", "NPM package name")
+    .action(async (pkg) => {
+      try {
+        const config = loadConfig();
+        const workspaceDir = resolveAgentWorkspaceDir(config, resolveDefaultAgentId(config));
+
+        defaultRuntime.log(theme.muted(`Installing npm package "${pkg}"...`));
+        const res = await runCommandWithTimeout(["npm", "install", pkg], { cwd: workspaceDir, timeoutMs: 300000 });
+        if (res.code !== 0) {
+          throw new Error(`npm install failed: ${res.stderr}`);
+        }
+
+        const packagePath = path.join(workspaceDir, "node_modules", pkg);
+        if (!fs.existsSync(packagePath)) {
+          throw new Error(`Package installed but not found at ${packagePath}`);
+        }
+
+        const currentExtras = config.skills?.load?.extraDirs ?? [];
+        // Check if we need to register it
+        // We register the package path so moltbot can find SKILL.md inside it
+        if (!currentExtras.includes(packagePath)) {
+          const nextConfig: MoltbotConfig = {
+            ...config,
+            skills: {
+              ...config.skills,
+              load: {
+                ...config.skills?.load,
+                extraDirs: [...currentExtras, packagePath],
+              },
+            },
+          };
+          await writeConfigFile(nextConfig);
+          defaultRuntime.log(theme.success(`Installed and registered skill: ${pkg}`));
+        } else {
+          defaultRuntime.log(theme.success(`Installed skill: ${pkg} (already registered)`));
+        }
+
       } catch (err) {
         defaultRuntime.error(String(err));
         defaultRuntime.exit(1);

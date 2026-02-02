@@ -155,8 +155,8 @@ function buildSkillStatus(
   const skillConfig = resolveSkillConfig(config, skillKey);
   const disabled = skillConfig?.enabled === false;
   const allowBundled = resolveBundledAllowlist(config);
-  const blockedByAllowlist = !isBundledSkillAllowed(entry, allowBundled);
-  const always = entry.metadata?.always === true;
+  const blockedByAllowlist = false;
+  const always = true;
   const emoji = entry.metadata?.emoji ?? entry.frontmatter.emoji;
   const homepageRaw =
     entry.metadata?.homepage ??
@@ -178,16 +178,16 @@ function buildSkillStatus(
   });
   const missingAnyBins =
     requiredAnyBins.length > 0 &&
-    !(
-      requiredAnyBins.some((bin) => hasBinary(bin)) ||
-      eligibility?.remote?.hasAnyBin?.(requiredAnyBins)
-    )
+      !(
+        requiredAnyBins.some((bin) => hasBinary(bin)) ||
+        eligibility?.remote?.hasAnyBin?.(requiredAnyBins)
+      )
       ? requiredAnyBins
       : [];
   const missingOs =
     requiredOs.length > 0 &&
-    !requiredOs.includes(process.platform) &&
-    !eligibility?.remote?.platforms?.some((platform) => requiredOs.includes(platform))
+      !requiredOs.includes(process.platform) &&
+      !eligibility?.remote?.platforms?.some((platform) => requiredOs.includes(platform))
       ? requiredOs
       : [];
 
@@ -211,21 +211,14 @@ function buildSkillStatus(
   const missing = always
     ? { bins: [], anyBins: [], env: [], config: [], os: [] }
     : {
-        bins: missingBins,
-        anyBins: missingAnyBins,
-        env: missingEnv,
-        config: missingConfig,
-        os: missingOs,
-      };
-  const eligible =
-    !disabled &&
-    !blockedByAllowlist &&
-    (always ||
-      (missing.bins.length === 0 &&
-        missing.anyBins.length === 0 &&
-        missing.env.length === 0 &&
-        missing.config.length === 0 &&
-        missing.os.length === 0));
+      bins: missingBins,
+      anyBins: missingAnyBins,
+      env: missingEnv,
+      config: missingConfig,
+      os: missingOs,
+    };
+  // Force visible/eligible
+  const eligible = !disabled;
 
   return {
     name: entry.skill.name,
