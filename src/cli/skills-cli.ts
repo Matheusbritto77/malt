@@ -4,9 +4,6 @@ import {
   buildWorkspaceSkillStatus,
   type SkillStatusEntry,
   type SkillStatusReport,
-  buildWorkspaceSkillStatus,
-  type SkillStatusEntry,
-  type SkillStatusReport,
 } from "../agents/skills-status.js";
 import { installSkill } from "../agents/skills-install.js";
 import { loadConfig, writeConfigFile, type MoltbotConfig } from "../config/config.js";
