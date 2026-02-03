@@ -31,6 +31,7 @@ RUN apt-get update && \
     file \
     git \
     ca-certificates \
+    golang-go \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/*
 
@@ -61,6 +62,15 @@ COPY scripts ./scripts
 
 RUN pnpm install --frozen-lockfile
 
+ENV CLAWDBOT_STATE_DIR="/app/data/.clawdbot"
+ENV CLAWDBOT_WORKSPACE_DIR="/app/data/clawd"
+ENV CLAWDBOT_PREFER_PNPM="1"
+ENV CLAWDBOT_NO_RESPAWN="1"
+ENV CI="true"
+
+# Create data directories and fix permissions early
+RUN mkdir -p $CLAWDBOT_STATE_DIR $CLAWDBOT_WORKSPACE_DIR && chown -R node:node /app
+
 COPY . .
 RUN CLAWDBOT_A2UI_SKIP_MISSING=1 pnpm build
 # Force pnpm for UI build (Bun may fail on ARM/Synology architectures)
@@ -70,14 +80,6 @@ RUN pnpm ui:build
 
 ENV NODE_ENV=production
 ENV PATH="/app/node_modules/.bin:${PATH}"
-ENV CLAWDBOT_STATE_DIR="/app/data/.clawdbot"
-ENV CLAWDBOT_WORKSPACE_DIR="/app/data/clawd"
-ENV CLAWDBOT_PREFER_PNPM="1"
-ENV CLAWDBOT_NO_RESPAWN="1"
-ENV CI="true"
-
-# Create data directories and fix permissions
-RUN mkdir -p /app/data/.clawdbot /app/data/clawd && chown -R node:node /app
 
 USER node
 
