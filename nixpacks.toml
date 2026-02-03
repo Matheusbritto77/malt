@@ -17,7 +17,9 @@ nixPkgs = [
     "pango",
     "cairo",
     "liberation_ttf",
-    "noto-fonts-emoji"
+    "noto-fonts-emoji",
+    "go_1_22",
+    "uv"
 ]
 
 [phases.install]

@@ -31,15 +31,22 @@ RUN apt-get update && \
     file \
     git \
     ca-certificates \
-    golang-go \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/*
+
+# Install Golang (explicitly for Go skills) and uv (for Python skills)
+RUN apt-get update && apt-get install -y --no-install-recommends golang-go curl && \
+    curl -LsSf https://astral.sh/uv/install.sh | sh && \
+    apt-get clean
+ENV PATH="/root/.local/bin:${PATH}"
 
 # Install Homebrew (Linuxbrew)
 ENV HOMEBREW_PREFIX="/home/linuxbrew/.linuxbrew"
 ENV PATH="${HOMEBREW_PREFIX}/bin:${HOMEBREW_PREFIX}/sbin:${PATH}"
 RUN /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" && \
+    eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)" && \
     if [ -d "$HOMEBREW_PREFIX" ]; then chown -R node:node "$HOMEBREW_PREFIX"; fi
+RUN echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"' >> /etc/bash.bashrc
 
 
 # Set Chromium executable path for the browser module

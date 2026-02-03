@@ -24,9 +24,10 @@ async function main() {
 
     // 3. Package with pkg
     console.log("--> Packaging with pkg...");
-    // We use node22 to match the project's engines requirement
+    // We use node22 to match the project's engines requirement.
+    // We use @yao-pkg/pkg (via dlx) which is a fork that supports Node 22.
     try {
-        execSync(`npx pkg . --targets node22-win-x64 --output ${path.join(outDir, "moltbot.exe")} --public`, {
+        execSync(`pnpm dlx @yao-pkg/pkg . --targets node22-win-x64 --output ${path.join(outDir, "moltbot.exe")} --public`, {
             cwd: root,
             stdio: "inherit"
         });
