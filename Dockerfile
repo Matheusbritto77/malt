@@ -69,7 +69,11 @@ ENV CLAWDBOT_NO_RESPAWN="1"
 ENV CI="true"
 
 # Create data directories and fix permissions early
-RUN mkdir -p $CLAWDBOT_STATE_DIR $CLAWDBOT_WORKSPACE_DIR && chown -R node:node /app
+RUN mkdir -p $CLAWDBOT_STATE_DIR $CLAWDBOT_WORKSPACE_DIR && \
+    mkdir -p /home/node/.cache && \
+    chown -R node:node /app /home/node /home/linuxbrew/.linuxbrew
+
+USER node
 
 COPY . .
 RUN CLAWDBOT_A2UI_SKIP_MISSING=1 pnpm build
@@ -81,7 +85,8 @@ RUN pnpm ui:build
 ENV NODE_ENV=production
 ENV PATH="/app/node_modules/.bin:${PATH}"
 
-USER node
+# User is already 'node' from above
+
 
 # We use a shell to allow environment variable expansion (like $PORT)
 CMD ["sh", "-c", "mkdir -p $CLAWDBOT_STATE_DIR $CLAWDBOT_WORKSPACE_DIR && ( [ ! -f $CLAWDBOT_STATE_DIR/moltbot.json ] && cp .clawdbot.json $CLAWDBOT_STATE_DIR/moltbot.json || true ) && node moltbot.mjs gateway run --bind lan --allow-unconfigured --port ${PORT:-80}"]
