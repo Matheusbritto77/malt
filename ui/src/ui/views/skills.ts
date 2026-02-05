@@ -57,6 +57,57 @@ export function renderSkills(props: SkillsProps) {
         <div class="muted">${filtered.length} shown</div>
       </div>
 
+      ${props.report?.envStatus
+      ? html`
+            <div class="chip-row" style="margin-top: 12px; gap: 8px;">
+              <span class="muted">System Environment:</span>
+              ${Object.entries(props.report.envStatus).map(
+        ([name, ok]) => html`
+                  <span class="chip ${ok ? "chip-ok" : "chip-warn"}">
+                    ${name}
+                  </span>
+                `,
+      )}
+            </div>
+          `
+      : nothing}
+
+      <div class="row" style="margin-top: 16px; align-items: flex-end; gap: 12px;">
+        <label class="field" style="flex: 1;">
+          <span>Quick Install (npm or system)</span>
+          <input
+            id="quick-install-input"
+            placeholder="e.g. axios or php"
+            @keydown=${(e: KeyboardEvent) => {
+      if (e.key === "Enter") {
+        const input = document.getElementById("quick-install-input") as HTMLInputElement;
+        const val = input.value.trim();
+        if (val) {
+          props.onInstall("dynamic", val, val.includes(":") ? val : `system:${val}`);
+          input.value = "";
+        }
+      }
+    }}
+          />
+        </label>
+        <button
+          class="btn primary"
+          ?disabled=${props.loading}
+          @click=${() => {
+      const input = document.getElementById("quick-install-input") as HTMLInputElement;
+      const val = input.value.trim();
+      if (val) {
+        // If no prefix, default to system (or node if it looks like one?)
+        const installId = val.includes(":") ? val : `system:${val}`;
+        props.onInstall("dynamic", val, installId);
+        input.value = "";
+      }
+    }}
+        >
+          Install
+        </button>
+      </div>
+
       ${props.error
       ? html`<div class="callout danger" style="margin-top: 12px;">${props.error}</div>`
       : nothing}
@@ -76,9 +127,15 @@ function renderSkill(skill: SkillStatusEntry, props: SkillsProps) {
   const busy = props.busyKey === skill.skillKey;
   const apiKey = props.edits[skill.skillKey] ?? "";
   const message = props.messages[skill.skillKey] ?? null;
-  const canInstall = skill.install.length > 0 && skill.missing.bins.length > 0;
+  const canInstall =
+    skill.install.length > 0 &&
+    (skill.missing.bins.length > 0 ||
+      skill.missing.dependencies.length > 0 ||
+      skill.missing.languages.length > 0);
   const missing = [
     ...skill.missing.bins.map((b) => `bin:${b}`),
+    ...skill.missing.dependencies.map((d) => `npm:${d}`),
+    ...skill.missing.languages.map((l) => `lang:${l}`),
     ...skill.missing.env.map((e) => `env:${e}`),
     ...skill.missing.config.map((c) => `config:${c}`),
     ...skill.missing.os.map((o) => `os:${o}`),
@@ -112,7 +169,7 @@ function renderSkill(skill: SkillStatusEntry, props: SkillsProps) {
       : nothing}
       </div>
       <div class="list-meta">
-        <div class="row" style="justify-content: flex-end; flex-wrap: wrap;">
+        <div class="row" style="justify-content: flex-end; flex-wrap: wrap; gap: 8px;">
           <button
             class="btn"
             ?disabled=${busy}
@@ -121,14 +178,18 @@ function renderSkill(skill: SkillStatusEntry, props: SkillsProps) {
             ${skill.disabled ? "Enable" : "Disable"}
           </button>
           ${canInstall
-      ? html`<button
-                class="btn"
-                ?disabled=${busy}
-                @click=${() =>
-          props.onInstall(skill.skillKey, skill.name, skill.install[0].id)}
-              >
-                ${busy ? "Installing…" : skill.install[0].label}
-              </button>`
+      ? skill.install.map(
+        (opt) => html`
+                    <button
+                      class="btn primary"
+                      ?disabled=${busy}
+                      @click=${() =>
+            props.onInstall(skill.skillKey, skill.name, opt.id)}
+                    >
+                      ${busy ? "Installing…" : opt.label}
+                    </button>
+                  `,
+      )
       : nothing}
         </div>
         ${message

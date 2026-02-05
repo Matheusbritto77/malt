@@ -398,23 +398,23 @@ export type CronWakeMode = "next-heartbeat" | "now";
 export type CronPayload =
   | { kind: "systemEvent"; text: string }
   | {
-      kind: "agentTurn";
-      message: string;
-      thinking?: string;
-      timeoutSeconds?: number;
-      deliver?: boolean;
-      provider?:
-        | "last"
-        | "whatsapp"
-        | "telegram"
-        | "discord"
-        | "slack"
-        | "signal"
-        | "imessage"
-        | "msteams";
-      to?: string;
-      bestEffortDeliver?: boolean;
-    };
+    kind: "agentTurn";
+    message: string;
+    thinking?: string;
+    timeoutSeconds?: number;
+    deliver?: boolean;
+    provider?:
+    | "last"
+    | "whatsapp"
+    | "telegram"
+    | "discord"
+    | "slack"
+    | "signal"
+    | "imessage"
+    | "msteams";
+    to?: string;
+    bestEffortDeliver?: boolean;
+  };
 
 export type CronIsolation = {
   postToMainPrefix?: string;
@@ -469,7 +469,7 @@ export type SkillsStatusConfigCheck = {
 
 export type SkillInstallOption = {
   id: string;
-  kind: "brew" | "node" | "go" | "uv";
+  kind: "brew" | "node" | "go" | "uv" | "download" | "system";
   label: string;
   bins: string[];
 };
@@ -490,15 +490,21 @@ export type SkillStatusEntry = {
   eligible: boolean;
   requirements: {
     bins: string[];
+    anyBins: string[];
     env: string[];
     config: string[];
     os: string[];
+    dependencies: string[];
+    languages: string[];
   };
   missing: {
     bins: string[];
+    anyBins: string[];
     env: string[];
     config: string[];
     os: string[];
+    dependencies: string[];
+    languages: string[];
   };
   configChecks: SkillsStatusConfigCheck[];
   install: SkillInstallOption[];
@@ -507,6 +513,7 @@ export type SkillStatusEntry = {
 export type SkillStatusReport = {
   workspaceDir: string;
   managedSkillsDir: string;
+  envStatus?: Record<string, boolean>;
   skills: SkillStatusEntry[];
 };
 

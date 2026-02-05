@@ -70,6 +70,7 @@ export type SkillStatusEntry = {
 export type SkillStatusReport = {
   workspaceDir: string;
   managedSkillsDir: string;
+  envStatus?: Record<string, boolean>;
   skills: SkillStatusEntry[];
 };
 
@@ -140,14 +141,7 @@ function normalizeInstallOptions(
     return { id, kind: spec.kind, label, bins };
   };
 
-  const allDownloads = filtered.every((spec) => spec.kind === "download");
-  if (allDownloads) {
-    return filtered.map((spec, index) => toOption(spec, index));
-  }
-
-  const preferred = selectPreferredInstallSpec(filtered, prefs);
-  if (!preferred) return [];
-  return [toOption(preferred.spec, preferred.index)];
+  return filtered.map((spec, index) => toOption(spec, index));
 }
 
 function buildSkillStatus(
@@ -161,7 +155,7 @@ function buildSkillStatus(
   const disabled = skillConfig?.enabled === false;
   const allowBundled = resolveBundledAllowlist(config);
   const blockedByAllowlist = false;
-  const always = true;
+  const always = entry.metadata?.always ?? false;
   const emoji = entry.metadata?.emoji ?? entry.frontmatter.emoji;
   const homepageRaw =
     entry.metadata?.homepage ??
@@ -218,17 +212,15 @@ function buildSkillStatus(
   });
   const missingConfig = configChecks.filter((check) => !check.satisfied).map((check) => check.path);
 
-  const missing = always
-    ? { bins: [], anyBins: [], env: [], config: [], os: [], dependencies: [], languages: [] }
-    : {
-      bins: missingBins,
-      anyBins: missingAnyBins,
-      env: missingEnv,
-      config: missingConfig,
-      os: missingOs,
-      dependencies: missingDeps,
-      languages: missingLangs,
-    };
+  const missing = {
+    bins: missingBins,
+    anyBins: missingAnyBins,
+    env: missingEnv,
+    config: missingConfig,
+    os: missingOs,
+    dependencies: missingDeps,
+    languages: missingLangs,
+  };
   // Force visible/eligible
   const eligible = !disabled;
 
@@ -272,10 +264,21 @@ export function buildWorkspaceSkillStatus(
 ): SkillStatusReport {
   const managedSkillsDir = opts?.managedSkillsDir ?? path.join(CONFIG_DIR, "skills");
   const skillEntries = opts?.entries ?? loadWorkspaceSkillEntries(workspaceDir, opts);
+  const envStatus: Record<string, boolean> = {
+    node: hasBinary("node"),
+    npm: hasBinary("npm"),
+    pnpm: hasBinary("pnpm"),
+    brew: hasBinary("brew"),
+    php: DependencyChecker.hasLanguage("php"),
+    python: DependencyChecker.hasLanguage("python"),
+    go: DependencyChecker.hasLanguage("go"),
+    rust: DependencyChecker.hasLanguage("rust"),
+  };
   const prefs = resolveSkillsInstallPreferences(opts?.config);
   return {
     workspaceDir,
     managedSkillsDir,
+    envStatus,
     skills: skillEntries.map((entry) =>
       buildSkillStatus(entry, opts?.config, prefs, opts?.eligibility),
     ),

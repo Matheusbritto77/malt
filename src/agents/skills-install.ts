@@ -316,17 +316,18 @@ export async function installSkill(params: SkillInstallRequest): Promise<SkillIn
 
   if (!entry) {
     // Dynamic creation for languages or known dependencies
-    if (
-      params.skillName &&
-      (params.installId.includes("node") || params.installId.includes("system"))
-    ) {
+    const isNode = params.installId.includes("node") || params.installId.includes("npm");
+    const isSystem = params.installId.includes("system");
+    if (params.skillName && (isNode || isSystem)) {
       const skillsPath = path.join(workspaceDir, "skills", params.skillName);
       if (!fs.existsSync(skillsPath)) {
         fs.mkdirSync(skillsPath, { recursive: true });
+        const kind = isNode ? "node" : "system";
+        const pkg = params.installId.split(":").pop() || params.skillName;
         const skillMd = `---
 name: ${params.skillName}
 description: Knowledge and management for ${params.skillName}.
-metadata: {"moltbot":{"emoji":"📦","requires":{"bins":["${params.skillName}"]},"install":[{"id":"${params.installId}","kind":"${params.installId.includes("node") ? "node" : "system"}","package":"${params.skillName}"}]}}
+metadata: {"moltbot":{"emoji":"📦","requires":{"bins":["${pkg}"]},"install":[{"id":"${params.installId}","kind":"${kind}","package":"${pkg}"}]}}
 ---
 
 # ${params.skillName}
