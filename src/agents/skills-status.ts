@@ -16,6 +16,7 @@ import {
   type SkillInstallSpec,
   type SkillsInstallPreferences,
 } from "./skills.js";
+import { DependencyChecker } from "./skills/dependency-checker.js";
 
 export type SkillStatusConfigCheck = {
   path: string;
@@ -50,6 +51,8 @@ export type SkillStatusEntry = {
     env: string[];
     config: string[];
     os: string[];
+    dependencies: string[];
+    languages: string[];
   };
   missing: {
     bins: string[];
@@ -57,6 +60,8 @@ export type SkillStatusEntry = {
     env: string[];
     config: string[];
     os: string[];
+    dependencies: string[];
+    languages: string[];
   };
   configChecks: SkillStatusConfigCheck[];
   install: SkillInstallOption[];
@@ -170,6 +175,8 @@ function buildSkillStatus(
   const requiredEnv = entry.metadata?.requires?.env ?? [];
   const requiredConfig = entry.metadata?.requires?.config ?? [];
   const requiredOs = entry.metadata?.os ?? [];
+  const requiredDeps = entry.metadata?.requires?.dependencies ?? [];
+  const requiredLangs = entry.metadata?.requires?.languages ?? [];
 
   const missingBins = requiredBins.filter((bin) => {
     if (hasBinary(bin)) return false;
@@ -191,6 +198,9 @@ function buildSkillStatus(
       ? requiredOs
       : [];
 
+  const missingDeps = requiredDeps.filter((dep) => !DependencyChecker.hasNpmDependency(dep));
+  const missingLangs = requiredLangs.filter((lang) => !DependencyChecker.hasLanguage(lang));
+
   const missingEnv: string[] = [];
   for (const envName of requiredEnv) {
     if (process.env[envName]) continue;
@@ -209,13 +219,15 @@ function buildSkillStatus(
   const missingConfig = configChecks.filter((check) => !check.satisfied).map((check) => check.path);
 
   const missing = always
-    ? { bins: [], anyBins: [], env: [], config: [], os: [] }
+    ? { bins: [], anyBins: [], env: [], config: [], os: [], dependencies: [], languages: [] }
     : {
       bins: missingBins,
       anyBins: missingAnyBins,
       env: missingEnv,
       config: missingConfig,
       os: missingOs,
+      dependencies: missingDeps,
+      languages: missingLangs,
     };
   // Force visible/eligible
   const eligible = !disabled;
@@ -240,6 +252,8 @@ function buildSkillStatus(
       env: requiredEnv,
       config: requiredConfig,
       os: requiredOs,
+      dependencies: requiredDeps,
+      languages: requiredLangs,
     },
     missing,
     configChecks,

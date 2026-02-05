@@ -2,7 +2,7 @@ import type { Skill } from "@mariozechner/pi-coding-agent";
 
 export type SkillInstallSpec = {
   id?: string;
-  kind: "brew" | "node" | "go" | "uv" | "download";
+  kind: "brew" | "node" | "go" | "uv" | "download" | "system";
   label?: string;
   bins?: string[];
   os?: string[];
@@ -28,6 +28,8 @@ export type MoltbotSkillMetadata = {
     anyBins?: string[];
     env?: string[];
     config?: string[];
+    dependencies?: string[];
+    languages?: string[];
   };
   install?: SkillInstallSpec[];
 };
