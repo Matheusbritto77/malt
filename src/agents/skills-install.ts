@@ -127,6 +127,11 @@ function buildInstallCommand(
       const target = spec.formula || spec.package;
       return { argv: process.platform === "win32" ? ["winget", "install", target!] : ["brew", "install", target!] };
     }
+    case "nix": {
+      if (!spec.formula && !spec.package) return { argv: null, error: "missing nix package" };
+      const target = spec.formula || spec.package;
+      return { argv: ["nix-env", "-iA", `nixpkgs.${target}`] };
+    }
     case "download": {
       return { argv: null, error: "download install handled separately" };
     }
@@ -318,11 +323,14 @@ export async function installSkill(params: SkillInstallRequest): Promise<SkillIn
     // Dynamic creation for languages or known dependencies
     const isNode = params.installId.includes("node") || params.installId.includes("npm");
     const isSystem = params.installId.includes("system");
-    if (params.skillName && (isNode || isSystem)) {
+    const isNix = params.installId.includes("nix");
+    if (params.skillName && (isNode || isSystem || isNix)) {
       const skillsPath = path.join(workspaceDir, "skills", params.skillName);
       if (!fs.existsSync(skillsPath)) {
         fs.mkdirSync(skillsPath, { recursive: true });
-        const kind = isNode ? "node" : "system";
+        let kind = "system";
+        if (isNode) kind = "node";
+        else if (isNix) kind = "nix";
         const pkg = params.installId.split(":").pop() || params.skillName;
         const skillMd = `---
 name: ${params.skillName}

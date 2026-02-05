@@ -36,7 +36,7 @@ function parseInstallSpec(input: unknown): SkillInstallSpec | undefined {
   const kindRaw =
     typeof raw.kind === "string" ? raw.kind : typeof raw.type === "string" ? raw.type : "";
   const kind = kindRaw.trim().toLowerCase();
-  if (kind !== "brew" && kind !== "node" && kind !== "go" && kind !== "uv" && kind !== "download") {
+  if (kind !== "brew" && kind !== "node" && kind !== "go" && kind !== "uv" && kind !== "download" && kind !== "system" && kind !== "nix") {
     return undefined;
   }
 
@@ -103,11 +103,11 @@ export function resolveMoltbotMetadata(
       os: osRaw.length > 0 ? osRaw : undefined,
       requires: requiresRaw
         ? {
-            bins: normalizeStringList(requiresRaw.bins),
-            anyBins: normalizeStringList(requiresRaw.anyBins),
-            env: normalizeStringList(requiresRaw.env),
-            config: normalizeStringList(requiresRaw.config),
-          }
+          bins: normalizeStringList(requiresRaw.bins),
+          anyBins: normalizeStringList(requiresRaw.anyBins),
+          env: normalizeStringList(requiresRaw.env),
+          config: normalizeStringList(requiresRaw.config),
+        }
         : undefined,
       install: install.length > 0 ? install : undefined,
     };

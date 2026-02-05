@@ -7,8 +7,6 @@ import { hasBinary } from "./config.js";
  * Foca em performance e precisão.
  */
 export class DependencyChecker {
-    private static packageJsonCache: Record<string, string> | null = null;
-
     /**
      * Verifica se uma dependência está no package.json local.
      */
@@ -38,17 +36,15 @@ export class DependencyChecker {
     }
 
     private static loadPackageDependencies(): Record<string, string> {
-        if (this.packageJsonCache) return this.packageJsonCache;
-
         try {
             const pkgPath = path.resolve(process.cwd(), "package.json");
+            if (!fs.existsSync(pkgPath)) return {};
             const pkg = JSON.parse(fs.readFileSync(pkgPath, "utf-8"));
-            this.packageJsonCache = {
+            return {
                 ...(pkg.dependencies ?? {}),
                 ...(pkg.devDependencies ?? {}),
                 ...(pkg.optionalDependencies ?? {}),
             };
-            return this.packageJsonCache!;
         } catch {
             return {};
         }

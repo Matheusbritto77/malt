@@ -269,6 +269,8 @@ export function buildWorkspaceSkillStatus(
     npm: hasBinary("npm"),
     pnpm: hasBinary("pnpm"),
     brew: hasBinary("brew"),
+    nix: hasBinary("nix-env"),
+    gcc: hasBinary("gcc"),
     php: DependencyChecker.hasLanguage("php"),
     python: DependencyChecker.hasLanguage("python"),
     go: DependencyChecker.hasLanguage("go"),

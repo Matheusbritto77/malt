@@ -74,16 +74,20 @@ export function renderSkills(props: SkillsProps) {
 
       <div class="row" style="margin-top: 16px; align-items: flex-end; gap: 12px;">
         <label class="field" style="flex: 1;">
-          <span>Quick Install (npm or system)</span>
+          <span>Quick Install (npm, system or nix)</span>
           <input
             id="quick-install-input"
-            placeholder="e.g. axios or php"
+            placeholder="e.g. axios, php or nix:gcc"
             @keydown=${(e: KeyboardEvent) => {
       if (e.key === "Enter") {
         const input = document.getElementById("quick-install-input") as HTMLInputElement;
         const val = input.value.trim();
         if (val) {
-          props.onInstall("dynamic", val, val.includes(":") ? val : `system:${val}`);
+          let installId = val;
+          if (!val.includes(":")) {
+            installId = `system:${val}`;
+          }
+          props.onInstall("dynamic", val, installId);
           input.value = "";
         }
       }
@@ -97,8 +101,10 @@ export function renderSkills(props: SkillsProps) {
       const input = document.getElementById("quick-install-input") as HTMLInputElement;
       const val = input.value.trim();
       if (val) {
-        // If no prefix, default to system (or node if it looks like one?)
-        const installId = val.includes(":") ? val : `system:${val}`;
+        let installId = val;
+        if (!val.includes(":")) {
+          installId = `system:${val}`;
+        }
         props.onInstall("dynamic", val, installId);
         input.value = "";
       }
