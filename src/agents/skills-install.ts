@@ -316,7 +316,10 @@ export async function installSkill(params: SkillInstallRequest): Promise<SkillIn
 
   if (!entry) {
     // Dynamic creation for languages or known dependencies
-    if (params.skillName && (params.installId.includes("node") || params.installId.includes("system"))) {
+    if (
+      params.skillName &&
+      (params.installId.includes("node") || params.installId.includes("system"))
+    ) {
       const skillsPath = path.join(workspaceDir, "skills", params.skillName);
       if (!fs.existsSync(skillsPath)) {
         fs.mkdirSync(skillsPath, { recursive: true });
@@ -338,134 +341,142 @@ Auto-generated skill for ${params.skillName}.
   }
 
   if (!entry) {
-
-    const spec = findInstallSpec(entry, params.installId);
-    if (!spec) {
-      return {
-        ok: false,
-        message: `Installer not found: ${params.installId}`,
-        stdout: "",
-        stderr: "",
-        code: null,
-      };
-    }
-    if (spec.kind === "download") {
-      return await installDownloadSpec({ entry, spec, timeoutMs });
-    }
-
-    const prefs = resolveSkillsInstallPreferences(params.config);
-    const command = buildInstallCommand(spec, prefs);
-    if (command.error) {
-      return {
-        ok: false,
-        message: command.error,
-        stdout: "",
-        stderr: "",
-        code: null,
-      };
-    }
-
-    const brewExe = hasBinary("brew") ? "brew" : resolveBrewExecutable();
-    if (spec.kind === "brew" && !brewExe) {
-      return {
-        ok: false,
-        message: "brew not installed",
-        stdout: "",
-        stderr: "",
-        code: null,
-      };
-    }
-    if (spec.kind === "uv" && !hasBinary("uv")) {
-      if (brewExe) {
-        const brewResult = await runCommandWithTimeout([brewExe, "install", "uv"], {
-          timeoutMs,
-        });
-        if (brewResult.code !== 0) {
-          return {
-            ok: false,
-            message: "Failed to install uv (brew)",
-            stdout: brewResult.stdout.trim(),
-            stderr: brewResult.stderr.trim(),
-            code: brewResult.code,
-          };
-        }
-      } else {
-        return {
-          ok: false,
-          message: "uv not installed (install via brew)",
-          stdout: "",
-          stderr: "",
-          code: null,
-        };
-      }
-    }
-    if (!command.argv || command.argv.length === 0) {
-      return {
-        ok: false,
-        message: "invalid install command",
-        stdout: "",
-        stderr: "",
-        code: null,
-      };
-    }
-
-    if (spec.kind === "brew" && brewExe && command.argv[0] === "brew") {
-      command.argv[0] = brewExe;
-    }
-
-    if (spec.kind === "go" && !hasBinary("go")) {
-      if (brewExe) {
-        const brewResult = await runCommandWithTimeout([brewExe, "install", "go"], {
-          timeoutMs,
-        });
-        if (brewResult.code !== 0) {
-          return {
-            ok: false,
-            message: "Failed to install go (brew)",
-            stdout: brewResult.stdout.trim(),
-            stderr: brewResult.stderr.trim(),
-            code: brewResult.code,
-          };
-        }
-      } else {
-        return {
-          ok: false,
-          message: "go not installed (install via brew)",
-          stdout: "",
-          stderr: "",
-          code: null,
-        };
-      }
-    }
-
-    let env: NodeJS.ProcessEnv | undefined;
-    if (spec.kind === "go" && brewExe) {
-      const brewBin = await resolveBrewBinDir(timeoutMs, brewExe);
-      if (brewBin) env = { GOBIN: brewBin };
-    }
-
-    const result = await (async () => {
-      const argv = command.argv;
-      if (!argv || argv.length === 0) {
-        return { code: null, stdout: "", stderr: "invalid install command" };
-      }
-      try {
-        return await runCommandWithTimeout(argv, {
-          timeoutMs,
-          env,
-        });
-      } catch (err) {
-        const stderr = err instanceof Error ? err.message : String(err);
-        return { code: null, stdout: "", stderr };
-      }
-    })();
-
-    const success = result.code === 0;
     return {
-      ok: success,
-      message: success ? "Installed" : formatInstallFailureMessage(result),
-      stdout: result.stdout.trim(),
-      stderr: result.stderr.trim(),
-      code: result.code,
+      ok: false,
+      message: `Skill not found: ${params.skillName}`,
+      stdout: "",
+      stderr: "",
+      code: null,
     };
   }
+
+  const spec = findInstallSpec(entry, params.installId);
+  if (!spec) {
+    return {
+      ok: false,
+      message: `Installer not found: ${params.installId}`,
+      stdout: "",
+      stderr: "",
+      code: null,
+    };
+  }
+  if (spec.kind === "download") {
+    return await installDownloadSpec({ entry, spec, timeoutMs });
+  }
+
+  const prefs = resolveSkillsInstallPreferences(params.config);
+  const command = buildInstallCommand(spec, prefs);
+  if (command.error) {
+    return {
+      ok: false,
+      message: command.error,
+      stdout: "",
+      stderr: "",
+      code: null,
+    };
+  }
+
+  const brewExe = hasBinary("brew") ? "brew" : resolveBrewExecutable();
+  if (spec.kind === "brew" && !brewExe) {
+    return {
+      ok: false,
+      message: "brew not installed",
+      stdout: "",
+      stderr: "",
+      code: null,
+    };
+  }
+  if (spec.kind === "uv" && !hasBinary("uv")) {
+    if (brewExe) {
+      const brewResult = await runCommandWithTimeout([brewExe, "install", "uv"], {
+        timeoutMs,
+      });
+      if (brewResult.code !== 0) {
+        return {
+          ok: false,
+          message: "Failed to install uv (brew)",
+          stdout: brewResult.stdout.trim(),
+          stderr: brewResult.stderr.trim(),
+          code: brewResult.code,
+        };
+      }
+    } else {
+      return {
+        ok: false,
+        message: "uv not installed (install via brew)",
+        stdout: "",
+        stderr: "",
+        code: null,
+      };
+    }
+  }
+  if (!command.argv || command.argv.length === 0) {
+    return {
+      ok: false,
+      message: "invalid install command",
+      stdout: "",
+      stderr: "",
+      code: null,
+    };
+  }
+
+  if (spec.kind === "brew" && brewExe && command.argv[0] === "brew") {
+    command.argv[0] = brewExe;
+  }
+
+  if (spec.kind === "go" && !hasBinary("go")) {
+    if (brewExe) {
+      const brewResult = await runCommandWithTimeout([brewExe, "install", "go"], {
+        timeoutMs,
+      });
+      if (brewResult.code !== 0) {
+        return {
+          ok: false,
+          message: "Failed to install go (brew)",
+          stdout: brewResult.stdout.trim(),
+          stderr: brewResult.stderr.trim(),
+          code: brewResult.code,
+        };
+      }
+    } else {
+      return {
+        ok: false,
+        message: "go not installed (install via brew)",
+        stdout: "",
+        stderr: "",
+        code: null,
+      };
+    }
+  }
+
+  let env: NodeJS.ProcessEnv | undefined;
+  if (spec.kind === "go" && brewExe) {
+    const brewBin = await resolveBrewBinDir(timeoutMs, brewExe);
+    if (brewBin) env = { GOBIN: brewBin };
+  }
+
+  const result = await (async () => {
+    const argv = command.argv;
+    if (!argv || argv.length === 0) {
+      return { code: null, stdout: "", stderr: "invalid install command" };
+    }
+    try {
+      return await runCommandWithTimeout(argv, {
+        timeoutMs,
+        env,
+      });
+    } catch (err) {
+      const stderr = err instanceof Error ? err.message : String(err);
+      return { code: null, stdout: "", stderr };
+    }
+  })();
+
+  const success = result.code === 0;
+  return {
+    ok: success,
+    message: success ? "Installed" : formatInstallFailureMessage(result),
+    stdout: result.stdout.trim(),
+    stderr: result.stderr.trim(),
+    code: result.code,
+  };
+}
