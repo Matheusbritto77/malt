@@ -269,6 +269,7 @@ export function buildWorkspaceSkillStatus(
     npm: hasBinary("npm"),
     pnpm: hasBinary("pnpm"),
     brew: hasBinary("brew"),
+    apt: hasBinary("apt-get"),
     nix: hasBinary("nix-env"),
     gcc: hasBinary("gcc"),
     php: DependencyChecker.hasLanguage("php"),

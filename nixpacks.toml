@@ -19,7 +19,9 @@ nixPkgs = [
     "liberation_ttf",
     "noto-fonts-emoji",
     "go",
-    "uv"
+    "uv",
+    "gcc",
+    "gnumake"
 ]
 
 [phases.install]

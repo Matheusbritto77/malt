@@ -72,13 +72,35 @@ export function isBundledSkillAllowed(entry: SkillEntry, allowlist?: string[]): 
 export function hasBinary(bin: string): boolean {
   const pathEnv = process.env.PATH ?? "";
   const parts = pathEnv.split(path.delimiter).filter(Boolean);
+
+  // Add common Linux/Nix/Brew paths if not present
+  if (process.platform === "linux") {
+    const home = process.env.HOME || "/root";
+    const extra = [
+      "/usr/local/bin",
+      "/home/linuxbrew/.linuxbrew/bin",
+      path.join(home, ".nix-profile/bin"),
+      path.join(home, ".local/bin"),
+    ];
+    for (const p of extra) {
+      if (!parts.includes(p)) parts.push(p);
+    }
+  }
+
   for (const part of parts) {
-    const candidate = path.join(part, bin);
-    try {
-      fs.accessSync(candidate, fs.constants.X_OK);
-      return true;
-    } catch {
-      // keep scanning
+    const candidates = [path.join(part, bin)];
+    if (process.platform === "win32" && !bin.includes(".")) {
+      candidates.push(path.join(part, `${bin}.exe`));
+      candidates.push(path.join(part, `${bin}.cmd`));
+      candidates.push(path.join(part, `${bin}.bat`));
+    }
+    for (const candidate of candidates) {
+      try {
+        fs.accessSync(candidate, fs.constants.X_OK);
+        return true;
+      } catch {
+        // next
+      }
     }
   }
   return false;

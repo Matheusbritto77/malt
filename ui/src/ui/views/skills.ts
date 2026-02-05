@@ -74,10 +74,10 @@ export function renderSkills(props: SkillsProps) {
 
       <div class="row" style="margin-top: 16px; align-items: flex-end; gap: 12px;">
         <label class="field" style="flex: 1;">
-          <span>Quick Install (npm, system or nix)</span>
+          <span>Quick Install (npm, system, nix or apt)</span>
           <input
             id="quick-install-input"
-            placeholder="e.g. axios, php or nix:gcc"
+            placeholder="e.g. axios, php, nix:gcc or apt:build-essential"
             @keydown=${(e: KeyboardEvent) => {
       if (e.key === "Enter") {
         const input = document.getElementById("quick-install-input") as HTMLInputElement;

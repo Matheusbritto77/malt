@@ -125,7 +125,10 @@ function buildInstallCommand(
     case "system": {
       if (!spec.formula && !spec.package) return { argv: null, error: "missing system package/formula" };
       const target = spec.formula || spec.package;
-      return { argv: process.platform === "win32" ? ["winget", "install", target!] : ["brew", "install", target!] };
+      if (process.platform === "win32") return { argv: ["winget", "install", target!] };
+      if (hasBinary("brew")) return { argv: ["brew", "install", target!] };
+      if (hasBinary("apt-get")) return { argv: ["sudo", "apt-get", "install", "-y", target!] };
+      return { argv: ["nix-env", "-iA", `nixpkgs.${target}`] };
     }
     case "nix": {
       if (!spec.formula && !spec.package) return { argv: null, error: "missing nix package" };
@@ -322,7 +325,7 @@ export async function installSkill(params: SkillInstallRequest): Promise<SkillIn
   if (!entry) {
     // Dynamic creation for languages or known dependencies
     const isNode = params.installId.includes("node") || params.installId.includes("npm");
-    const isSystem = params.installId.includes("system");
+    const isSystem = params.installId.includes("system") || params.installId.includes("apt");
     const isNix = params.installId.includes("nix");
     if (params.skillName && (isNode || isSystem || isNix)) {
       const skillsPath = path.join(workspaceDir, "skills", params.skillName);
